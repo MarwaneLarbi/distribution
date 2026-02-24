@@ -29,6 +29,7 @@ import (
 	"github.com/distribution/distribution/v3/internal/dcontext"
 	"github.com/distribution/distribution/v3/registry/handlers"
 	"github.com/distribution/distribution/v3/registry/listener"
+	tpmtls "github.com/distribution/distribution/v3/registry/internal/tpmtls"
 	"github.com/distribution/distribution/v3/tracing"
 	"github.com/distribution/distribution/v3/version"
 )
@@ -282,7 +283,7 @@ func (registry *Registry) ListenAndServe() error {
 			tlsConf.NextProtos = append(tlsConf.NextProtos, acme.ALPNProto)
 		} else {
 			tlsConf.Certificates = make([]tls.Certificate, 1)
-			tlsConf.Certificates[0], err = tls.LoadX509KeyPair(config.HTTP.TLS.Certificate, config.HTTP.TLS.Key)
+			tlsConf.Certificates[0], err = tpmtls.LoadCertificate(config.HTTP.TLS.Certificate, config.HTTP.TLS.Key)
 			if err != nil {
 				return err
 			}
@@ -433,7 +434,7 @@ func logLevel(level configuration.Loglevel) logrus.Level {
 	l, err := logrus.ParseLevel(string(level))
 	if err != nil {
 		l = logrus.InfoLevel
-		logrus.Warnf("error parsing level %q: %v, using %q	", level, err, l)
+		logrus.Warnf("error parsing level %q: %v, using %q\t", level, err, l)
 	}
 
 	return l
